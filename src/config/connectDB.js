@@ -1,4 +1,5 @@
-const { Sequelize } = require('sequelize');
+// const { Sequelize } = require('sequelize');
+import Sequelize from 'sequelize';
 
 // // Option 1: Passing a connection URI
 // const sequelize = new Sequelize('sqlite::memory:') // Example for sqlite
@@ -11,10 +12,11 @@ const { Sequelize } = require('sequelize');
 // });
 
 // Option 2: Passing parameters separately (other dialects)
-const sequelize = new Sequelize('database_development', 'root', null, {
+const sequelize = new Sequelize('booking_care', 'root', null, {
   host: 'localhost',
   dialect: 'mysql',
   logging: false,
+  // port: 3308,
 });
 
 let connect = async () => {
