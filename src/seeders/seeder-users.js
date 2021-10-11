@@ -2,20 +2,16 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    //* email: DataTypes.STRING,
-    //* firstName: DataTypes.STRING,
-    //* lastName: DataTypes.STRING,
-    //* address: DataTypes.STRING,
-    //* gender: DataTypes.BOOLEAN,
-    //* roleid: DataTypes.STRING
     return await queryInterface.bulkInsert('Users', [
       {
         email: 'kidohero@gmail.com',
+        password: '123456',
         firstName: 'ki đô',
         lastName: 'hê rô',
-        address: 'Đà Nẵng hihi',
+        address: 'Vietnam',
         gender: 1,
-        roleid: 1,
+        typeRole: 'ROLE',
+        keyRole: 'R1',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
