@@ -3,9 +3,11 @@ import homeController from '../controllers/homeController';
 let router = express.Router();
 
 let initWebRoutes = (app) => {
-  router.get('/', homeController.getHomePage);
+  // router.get('/', homeController.getHomePage);
+  router.get('/', (req, res) => res.send('Hề lồ phòm dì a thớ sai :v'));
   router.get('/why', (req, res) => res.send('tại sao không?'));
-  // router.  get('/', (req, res) => res.send('có vấn đề gì à?'));
+  router.get('/CRUD', homeController.getCRUD);
+  router.post('/post-crud', homeController.postCRUD);
   return app.use('/', router);
 };
 module.exports = initWebRoutes;
