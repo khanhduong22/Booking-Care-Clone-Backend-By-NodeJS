@@ -1,6 +1,19 @@
 import bcrypt from 'bcryptjs';
 import db from '../models/index';
 
+const salt = bcrypt.genSaltSync(10);
+
+let hashUserPassword = (password) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let hashPassword = await bcrypt.hashSync(password, salt);
+      resolve(hashPassword);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 let handleUserLogin = (email, password) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -56,7 +69,134 @@ let checkUserEmail = (userEmail) => {
   });
 };
 
+let getAllUser = (userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let users = {};
+
+      if (userId === 'ALL') {
+        users = await db.User.findAll({
+          attributes: {
+            exclude: ['password'],
+          },
+        });
+      } else {
+        users = await db.User.findOne({
+          where: { id: userId },
+        });
+      }
+
+      resolve(users);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let createNewUser = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let check = await checkUserEmail(data.email);
+      if (check === true) {
+        resolve({
+          errorCode: 1,
+          errorMessage:
+            'Your email is already in used, please try another email',
+        });
+      } else {
+        let hashPasswordFromBcryptjs = await hashUserPassword(data.password);
+        await db.User.create({
+          email: data.email,
+          password: hashPasswordFromBcryptjs,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          address: data.address,
+          phoneNumber: data.phoneNumber,
+          gender: data.sex === '1' ? true : false,
+          roleId: data.roleId,
+        });
+      }
+      resolve({
+        errorCode: 0,
+        errorMessage: 'OK',
+      });
+    } catch (error) {
+      reject(Error);
+    }
+  });
+};
+
+let deleteUser = (userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await db.User.findOne({
+        where: { id: userId },
+      });
+      if (!user) {
+        resolve({
+          errorCode: 2,
+          errorMessage: `The user isn't exit`,
+        });
+      }
+      await db.User.destroy({
+        where: { id: userId },
+      });
+      resolve({
+        errorCode: 0,
+        errorMessage: `The user is deleted`,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let updateUserData = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data.id) {
+        resolve({
+          errorCode: 2,
+          errorMessage: 'Missing input parameter!!',
+        });
+      }
+      let user = await db.User.findOne({
+        where: { id: data.id },
+        raw: false,
+      });
+      if (user) {
+        user.firstName = data.firstName;
+        user.lastName = data.lastName;
+        user.address = data.address;
+
+        await user.save();
+
+        // await db.User.save({
+        //   firstName = data.firstName,
+        //   lastName = data.lastName,
+        //   address = data.address,
+        // });
+        resolve({
+          errorCode: 0,
+          errorMessage: 'Update user success!',
+        });
+      } else {
+        resolve({
+          errorCode: 1,
+          errorMessage: `User's not found`,
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports = {
   handleUserLogin: handleUserLogin,
   checkUserEmail: checkUserEmail,
+  getAllUser: getAllUser,
+  createNewUser: createNewUser,
+  deleteUser: deleteUser,
+  updateUserData: updateUserData,
 };
