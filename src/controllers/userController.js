@@ -64,7 +64,6 @@ let deleteUser = async (req, res) => {
 let getAllCode = async (req, res) => {
   try {
     let type = req.query.type || req.body.type;
-    console.log(`type`, type);
     let data = await userServices.getAllCodeServices(type);
     return res.status(200).json(data);
   } catch (error) {

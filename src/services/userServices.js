@@ -96,6 +96,12 @@ let getAllUser = (userId) => {
 let createNewUser = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
+      if (!data) {
+        resolve({
+          errorCode: 5,
+          errorMessage: 'Missing data',
+        });
+      }
       let check = await checkUserEmail(data.email);
       if (check === true) {
         resolve({
@@ -112,8 +118,9 @@ let createNewUser = (data) => {
           lastName: data.lastName,
           address: data.address,
           phoneNumber: data.phoneNumber,
-          gender: data.sex === '1' ? true : false,
+          gender: data.gender,
           roleId: data.roleId,
+          positionId: data.positionId,
         });
       }
       resolve({
@@ -121,7 +128,7 @@ let createNewUser = (data) => {
         errorMessage: 'OK',
       });
     } catch (error) {
-      reject(Error);
+      reject(error);
     }
   });
 };
@@ -154,7 +161,15 @@ let deleteUser = (userId) => {
 let updateUserData = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!data.id) {
+      if (
+        !data.id ||
+        !data.firstName ||
+        !data.lastName ||
+        !data.address ||
+        !data.roleId ||
+        !data.positionId ||
+        !data.gender
+      ) {
         resolve({
           errorCode: 2,
           errorMessage: 'Missing input parameter!!',
@@ -168,6 +183,10 @@ let updateUserData = (data) => {
         user.firstName = data.firstName;
         user.lastName = data.lastName;
         user.address = data.address;
+        user.gender = data.gender;
+        user.roleId = data.roleId;
+        user.positionId = data.positionId;
+        user.phonenumber = data.phoneNumber;
 
         await user.save();
 
