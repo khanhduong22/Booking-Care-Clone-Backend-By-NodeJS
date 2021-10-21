@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": null,
-    "database": "booking_care",
+    "database": "booking_care_clone",
     "host": "localhost",
     "dialect": "mysql",
     "logging": false,
