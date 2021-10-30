@@ -1,6 +1,7 @@
 import db from '../models/index';
 import _ from 'lodash';
 require('dotenv').config();
+import emailService from '../services/emailService';
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
@@ -430,6 +431,100 @@ let getProfileDoctorById = (doctorId) => {
   });
 };
 
+let getListPatientForDoctor = (doctorId, date) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!doctorId || !date) {
+        resolve({
+          errorCode: 1,
+          errorMessage: 'Missing parameter',
+        });
+      } else {
+        let data = await db.Booking.findAll({
+          where: {
+            doctorId: doctorId,
+            statusId: 'S2',
+            date: date,
+          },
+          include: [
+            {
+              model: db.User,
+              as: 'patientData',
+              attributes: ['email', 'firstName', 'address', 'gender'],
+              include: [
+                {
+                  model: db.Allcode,
+                  as: 'genderData',
+                  attributes: ['valueEn', 'valueVi'],
+                },
+              ],
+            },
+            {
+              model: db.Allcode,
+              as: 'timeTypeDataPatient',
+              attributes: ['valueEn', 'valueVi'],
+            },
+          ],
+          raw: false,
+          nest: true,
+        });
+        resolve({
+          errorCode: 0,
+          errorMessage: 'OK',
+          data,
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let sendRemedy = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (
+        !data.email ||
+        !data.imageBase64 ||
+        !data.doctorId ||
+        !data.patientId ||
+        !data.timeType
+      ) {
+        resolve({
+          errorCode: 1,
+          errorMessage: 'Missing parameter',
+        });
+      } else {
+        //todo update patient status
+        let appointment = await db.Booking.findOne({
+          where: {
+            doctorId: data.doctorId,
+            patientId: data.patientId,
+            timeType: data.timeType,
+            statusId: 'S2',
+          },
+          raw: false,
+        });
+        if (appointment) {
+          appointment.statusId = 'S3';
+          await appointment.save();
+        }
+
+        //todo send email
+        await emailService.sendAttachment(data);
+
+        resolve({
+          errorCode: 0,
+          errorMessage: 'OK',
+          data,
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports = {
   getAllDoctors: getAllDoctors,
   getTopDoctorHome: getTopDoctorHome,
@@ -439,4 +534,6 @@ module.exports = {
   getScheduleByDate,
   getExtraInfoDoctorById,
   getProfileDoctorById,
+  getListPatientForDoctor,
+  sendRemedy,
 };

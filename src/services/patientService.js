@@ -12,7 +12,15 @@ let buildUrlEmail = (doctorId, token) => {
 let patientBookAppointmentById = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!data.email || !data.doctorId || !data.timeType || !data.date) {
+      if (
+        !data.email ||
+        !data.doctorId ||
+        !data.timeType ||
+        !data.date ||
+        !data.fullName ||
+        !data.selectedGender ||
+        !data.address
+      ) {
         resolve({
           errorCode: 1,
           errorMessage: 'Missing parameter',
@@ -33,6 +41,9 @@ let patientBookAppointmentById = (data) => {
           defaults: {
             email: data.email,
             roleId: 'R3',
+            address: data.address,
+            gender: data.selectedGender,
+            firstName: data.fullName,
           },
         });
         if (user && user[0]) {
